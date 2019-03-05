@@ -1,40 +1,24 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
 
-type Tesla struct {
-	Status string `json:"status"`
-}
-
 func main() {
-	start := func(w http.ResponseWriter, _ *http.Request) {
-		// TODO: start the car
-		tesla := Tesla{
-			Status: "STARTED",
-		}
-		data, _ := json.Marshal(tesla)
+
+	state := func(w http.ResponseWriter, r *http.Request) {
+		body, _ := ioutil.ReadAll(r.Body)
+		defer r.Body.Close()
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(data)
+		w.Write(body)
 	}
 
-	stop := func(w http.ResponseWriter, _ *http.Request) {
-		// TODO: stop the car
-		tesla := Tesla{
-			Status: "STOPPED",
-		}
-		data, _ := json.Marshal(tesla)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(data)
-	}
+	http.HandleFunc("/tesla/engine", state)
 
-	http.HandleFunc("/tesla/123/start", start)
-	http.HandleFunc("/tesla/123/stop", stop)
-	fmt.Println("Start: http://localhost:8080/tesla/123/start")
-	fmt.Println("Stop: http://localhost:8080/tesla/123/stop")
+	fmt.Println(`curl -H "Content-Type: application/Json" -XPOST -d '{"status": "STARTED", "id": "a12163bf-6e33-57d8-959c-559f5ca44a22"}' 127.0.0.1:8080/tesla/engine`)
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

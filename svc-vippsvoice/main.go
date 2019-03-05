@@ -21,20 +21,14 @@ func main() {
 	defer conn.Close()
 	client := pb.NewPaymentsClient(conn)
 
-	method := flag.String("action", "", "")
+	action := flag.String("action", "", "")
 	amount := flag.String("amount", "", "")
-	id := flag.String("id", "", "")
-
 	flag.Parse()
 
-	switch *method {
-	case "PAY":
+	switch *action {
+	case "pay":
 		pay(client, *amount)
-	case "CONFIRM":
-		confirm(client, *id)
-	case "GET":
-		getById(client, *id)
-	case "ALL":
+	case "getall":
 		getAll(client)
 	default:
 		fmt.Println("unknown argument")
@@ -49,20 +43,6 @@ func pay(client pb.PaymentsClient, amount string) {
 		To:     "234432",
 	}
 	rsp, _ := client.Pay(context.Background(), payment)
-	fmt.Printf("Response: %v\n", rsp)
-}
-
-func confirm(client pb.PaymentsClient, id string) {
-	rsp, _ := client.Confirm(context.Background(), &pb.PaymentByIdRequest{
-		Id: id,
-	})
-	fmt.Printf("Response: %v\n", rsp)
-}
-
-func getById(client pb.PaymentsClient, id string) {
-	rsp, _ := client.GetById(context.Background(), &pb.PaymentByIdRequest{
-		Id: id,
-	})
 	fmt.Printf("Response: %v\n", rsp)
 }
 
